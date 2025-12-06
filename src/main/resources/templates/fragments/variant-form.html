@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <th:block th:fragment="form">
+    <style>
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+      .form-row > div { min-width: 0; }
+      .actions { margin-top: .75rem; display: flex; gap: .5rem; }
+      .btn { background: #007bff; color: #fff; border: none; padding: .5rem .9rem; border-radius: .375rem; cursor: pointer; }
+      .btn-secondary { background: #6c757d; }
+      label { font-weight: 500; }
+      input[type="text"], input[type="number"] { width: 100%; padding: .5rem .6rem; border: 1px solid #dee2e6; border-radius: .375rem; }
+      .checkbox { display:flex; align-items:center; gap:.5rem; }
+    </style>
+
+    <div>
+      <form th:with="isEdit=${mode} == 'edit'"
+            th:attr="hx-post=${isEdit} ? @{/products/{productId}/variants/{variantId}/update(productId=${productId},variantId=${variant.id})} : @{/products/{productId}/variants(productId=${productId})}"
+            th:attrappend=" hx-target=|#variants-content-${productId}|"
+            hx-swap="innerHTML">
+        <div class="form-row">
+          <div>
+            <label for="v_color">Color *</label>
+            <input id="v_color" type="text" name="color" required th:value="${isEdit} ? ${variant.colorOption} : ''" />
+          </div>
+          <div>
+            <label for="v_size">Size</label>
+            <input id="v_size" type="text" name="size" th:value="${isEdit} ? ${variant.sizeOption} : ''" />
+          </div>
+          <div>
+            <label for="v_price">Price *</label>
+            <input id="v_price" type="number" name="price" step="0.01" min="0" required th:value="${isEdit} ? ${variant.price} : ''" />
+          </div>
+          <div class="checkbox">
+            <input id="v_available" type="checkbox" name="available" th:checked="${isEdit} ? ${variant.available} : true" />
+            <label for="v_available">Available</label>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn" th:text="${isEdit} ? 'Save changes' : 'Create variant'">Create variant</button>
+          <button type="button" class="btn btn-secondary"
+                  th:attr="hx-get=@{/products/{id}/variants(id=${productId})}, hx-target=|#variants-content-${productId}|"
+                  hx-swap="innerHTML">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </th:block>
+</body>
+</html>

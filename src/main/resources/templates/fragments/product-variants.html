@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="variants">
+        <style>
+            .products-table th,
+            .products-table td { text-align: center; vertical-align: middle; }
+            .icon-btn { display: inline-flex; align-items: center; justify-content: center; }
+            .icon-btn wa-icon { vertical-align: middle; }
+        </style>
+        <div th:if="${#lists.isEmpty(variants)}" class="empty-state" style="display:flex; align-items:center; justify-content: space-between; gap: 1rem;">
+            <span>No variants available for this product.</span>
+            <span>
+                <button class="btn-link"
+                        th:attr="hx-get=@{/products/{productId}/variants/new(productId=${productId})}, hx-target=|#variants-content-${productId}|"
+                        hx-swap="innerHTML">
+                    Add variant
+                </button>
+            </span>
+        </div>
+        <table th:if="${!#lists.isEmpty(variants)}" class="products-table">
+            <thead>
+                <tr>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th style="text-align:center;width:120px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="v : ${variants}">
+                    <td th:text="${v.colorOption}"></td>
+                    <td th:text="${v.sizeOption ?: 'N/A'}"></td>
+                    <td th:text="${#numbers.formatDecimal(v.price, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${v.available ? 'Yes' : 'No'}"></td>
+                    <td>
+                        <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center;">
+                            <button class="btn-link icon-btn"
+                                    th:attr="hx-get=@{/products/{productId}/variants/{variantId}/edit(productId=${productId},variantId=${v.id})}, hx-target=|#variants-content-${productId}|"
+                                    hx-swap="innerHTML"
+                                    title="Edit variant" aria-label="Edit variant">
+                                <wa-icon name="pen-to-square"></wa-icon>
+                            </button>
+                            <button class="btn-link btn-danger icon-btn"
+                                    th:attr="hx-post=@{/products/{productId}/variants/{variantId}/delete(productId=${productId},variantId=${v.id})}, hx-target=|#variants-content-${productId}|"
+                                    hx-swap="innerHTML"
+                                    onclick="return confirm('Delete this variant?');"
+                                    title="Delete variant" aria-label="Delete variant">
+                                <wa-icon name="trash"></wa-icon>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${!#lists.isEmpty(variants)}" style="margin-top: .5rem;">
+            <button class="btn-link"
+                    th:attr="hx-get=@{/products/{productId}/variants/new(productId=${productId})}, hx-target=|#variants-content-${productId}|"
+                    hx-swap="innerHTML">
+                Add variant
+            </button>
+        </div>
+    </th:block>
+</body>
+</html>

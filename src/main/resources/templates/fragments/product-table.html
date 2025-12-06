@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="table">
+        <style>
+            .variants-row { display: none; background: #fafafa; }
+            .variants-row.open { display: table-row !important; }
+            .variants-cell { padding: 0; }
+            .products-table th,
+            .products-table td { text-align: center; vertical-align: middle; }
+            .btn-link { background: none; border: none; color: #007bff; cursor: pointer; padding: 0; }
+            .btn-danger { color: #dc3545; }
+            .icon-btn { display: inline-flex; align-items: center; justify-content: center; }
+            .icon-btn wa-icon { vertical-align: middle; }
+        </style>
+        <table th:if="${!products.isEmpty()}" class="products-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Vendor</th>
+                    <th>Product type</th>
+                    <th style="width:120px;">Variants</th>
+                    <th style="text-align:center;width:160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="product : ${products}">
+                    <tr>
+                        <td th:text="${product.title}"></td>
+                        <td th:text="${product.vendor}"></td>
+                        <td th:text="${product.productType ?: 'N/A'}"></td>
+                        <td>
+                            <button type="button" class="btn-link js-toggle-variants"
+                                    th:data-product-id="${product.id}"
+                                    th:attr="hx-get=@{/products/{id}/variants(id=${product.id})}, hx-target=|#variants-content-${product.id}|"
+                                    hx-swap="innerHTML">
+                                View variants
+                            </button>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center;">
+                                <button class="btn-link icon-btn"
+                                        th:attr="hx-get=@{/products/{id}/edit(id=${product.id})}, hx-target=|#product-edit-content-${product.id}|, data-pid=${product.id}"
+                                        hx-swap="innerHTML"
+                                        hx-on:htmx:beforeRequest="document.getElementById('product-edit-row-' + this.getAttribute('data-pid')).style.display='table-row'"
+                                        title="Edit product" aria-label="Edit product">
+                                    <wa-icon name="pen-to-square"></wa-icon>
+                                </button>
+                                <button class="btn-link btn-danger icon-btn"
+                                        th:attr="hx-post=@{/products/{id}/delete(id=${product.id})}"
+                                        hx-target="#products-table"
+                                        hx-swap="innerHTML"
+                                        onclick="return confirm('Delete this product and all its variants?');"
+                                        title="Delete product" aria-label="Delete product">
+                                    <wa-icon name="trash"></wa-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:id="${'product-edit-row-' + product.id}" class="product-edit-row" style="display: none;">
+                        <td class="product-edit-cell" colspan="5">
+                            <div th:id="${'product-edit-content-' + product.id}"></div>
+                        </td>
+                    </tr>
+                    <tr th:id="${'variants-row-' + product.id}" class="variants-row" style="display: none;">
+                        <td class="variants-cell" colspan="5">
+                            <div th:id="${'variants-content-' + product.id}">
+                                <!-- Variants will be loaded here on first click -->
+                            </div>
+                        </td>
+                    </tr>
+                </th:block>
+            </tbody>
+        </table>
+
+        <div th:if="${!products.isEmpty()}" class="pagination" style="display:flex;flex-direction:column;align-items:center;margin-top:0.75rem;gap:0.25rem;">
+            <div>
+                <button class="btn-link" th:disabled="${!hasPrev}"
+                        hx-target="#products-table" hx-swap="innerHTML"
+                        th:attr="hx-get=@{/products/table(page=${page - 1}, q=${query})}">
+                    ◀ Prev
+                </button>
+                <button class="btn-link" th:disabled="${!hasNext}"
+                        hx-target="#products-table" hx-swap="innerHTML"
+                        th:attr="hx-get=@{/products/table(page=${page + 1}, q=${query})}">
+                    Next ▶
+                </button>
+            </div>
+            <div>
+                <span th:text="${'Page ' + (page + 1) + ' of ' + (totalPages == 0 ? 1 : totalPages)}"></span>
+            </div>
+        </div>
+        
+        <div th:if="${products.isEmpty()}" class="empty-state">
+            <span th:if="${#strings.isEmpty(query)}">No products found. Products will be loaded from the API automatically.</span>
+            <span th:unless="${#strings.isEmpty(query)}" th:text="${'No products match “' + query + '”'}">No matching products</span>
+        </div>
+    </th:block>
+</body>
+</html>
+

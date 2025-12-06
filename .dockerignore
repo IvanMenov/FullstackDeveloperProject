@@ -1,0 +1,16 @@
+build/classes/
+build/kotlin/
+build/reports/
+build/tmp/
+build/resources/
+.gradle/
+.idea/
+*.iml
+.git/
+.gitignore
+README.md
+HELP.md
+*.md
+gradlew
+gradlew.bat
+

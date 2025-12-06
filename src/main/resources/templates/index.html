@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products Manager</title>
+    
+    <!-- Web Awesome -->
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.6/dist/styles/themes/default.css">
+    <script type="module" src="https://early.webawesome.com/webawesome@3.0.0-beta.6/dist/webawesome.loader.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <!-- App scripts -->
+    <script src="/js/products.js"></script>
+    
+    <style>
+        :root {
+            /* Web Awesome Design Tokens */
+            --wa-color-brand-fill-normal: #007bff;
+            --wa-color-brand-fill-hover: #0056b3;
+            --wa-color-neutral-fill-rest: #6c757d;
+            --wa-color-success-fill: #28a745;
+            --wa-color-danger-fill: #dc3545;
+            --wa-color-neutral-layer-card-container: #ffffff;
+            --wa-color-neutral-layer-1: #f8f9fa;
+            --wa-color-neutral-foreground-rest: #212529;
+            --wa-color-neutral-foreground-hint: #6c757d;
+            --wa-color-neutral-stroke-rest: #dee2e6;
+            --wa-spacing-unit: 0.25rem;
+            --wa-spacing-xs: calc(var(--wa-spacing-unit) * 1);
+            --wa-spacing-sm: calc(var(--wa-spacing-unit) * 2);
+            --wa-spacing-md: calc(var(--wa-spacing-unit) * 4);
+            --wa-spacing-lg: calc(var(--wa-spacing-unit) * 6);
+            --wa-spacing-xl: calc(var(--wa-spacing-unit) * 8);
+            --wa-stroke-width-thin: 1px;
+            --wa-stroke-width-thick: 2px;
+            --wa-corner-radius: 0.375rem;
+            --wa-shadow-layer-1: 0 1px 3px rgba(0,0,0,0.1);
+            --wa-shadow-layer-2: 0 4px 6px rgba(0,0,0,0.1);
+            
+            /* Legacy support for our custom styles */
+            --wa-primary-color: var(--wa-color-brand-fill-normal);
+            --wa-secondary-color: var(--wa-color-neutral-fill-rest);
+            --wa-success-color: var(--wa-color-success-fill);
+            --wa-danger-color: var(--wa-color-danger-fill);
+            --wa-background: var(--wa-color-neutral-layer-card-container);
+            --wa-surface: var(--wa-color-neutral-layer-1);
+            --wa-text-primary: var(--wa-color-neutral-foreground-rest);
+            --wa-text-secondary: var(--wa-color-neutral-foreground-hint);
+            --wa-border-color: var(--wa-color-neutral-stroke-rest);
+            --wa-border-radius: var(--wa-corner-radius);
+            --wa-shadow: var(--wa-shadow-layer-1);
+            --wa-shadow-lg: var(--wa-shadow-layer-2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--wa-surface);
+            color: var(--wa-text-primary);
+            line-height: 1.6;
+            padding: var(--wa-spacing-xl);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--wa-color-neutral-layer-card-container);
+            border-radius: var(--wa-corner-radius);
+            box-shadow: var(--wa-shadow-layer-2);
+            padding: var(--wa-spacing-xl);
+        }
+        
+        h1 {
+            color: var(--wa-text-primary);
+            margin-bottom: var(--wa-spacing-lg);
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: var(--wa-spacing-md);
+            margin-bottom: var(--wa-spacing-md);
+        }
+        .tab-btn {
+            background: var(--wa-color-neutral-layer-1);
+            color: var(--wa-text-primary);
+            border: var(--wa-stroke-width-thin) solid var(--wa-border-color);
+            border-radius: var(--wa-corner-radius);
+            padding: var(--wa-spacing-sm) var(--wa-spacing-lg);
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: var(--wa-color-brand-fill-normal);
+            color: #fff;
+            border-color: var(--wa-color-brand-fill-normal);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .section {
+            margin-bottom: var(--wa-spacing-xl);
+        }
+        
+        .form-group {
+            margin-bottom: var(--wa-spacing-md);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: var(--wa-spacing-xs);
+            color: var(--wa-text-primary);
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: var(--wa-spacing-sm) var(--wa-spacing-md);
+            border: var(--wa-stroke-width-thin) solid var(--wa-color-neutral-stroke-rest);
+            border-radius: var(--wa-corner-radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--wa-color-brand-fill-normal);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        button {
+            background: var(--wa-color-brand-fill-normal);
+            color: white;
+            border: none;
+            padding: var(--wa-spacing-sm) var(--wa-spacing-lg);
+            border-radius: var(--wa-corner-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--wa-spacing-xs);
+        }
+        
+        button:hover {
+            background: var(--wa-color-brand-fill-hover);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--wa-color-neutral-fill-rest);
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--wa-spacing-lg);
+            background: var(--wa-color-neutral-layer-card-container);
+        }
+        
+        thead {
+            background: var(--wa-color-neutral-layer-1);
+        }
+        
+        th, td {
+            padding: var(--wa-spacing-md);
+            text-align: left;
+            border-bottom: var(--wa-stroke-width-thin) solid var(--wa-color-neutral-stroke-rest);
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--wa-color-neutral-foreground-rest);
+        }
+        
+        tbody tr:hover {
+            background: var(--wa-color-neutral-layer-1);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--wa-spacing-xl);
+            color: var(--wa-color-neutral-foreground-hint);
+        }
+        
+        .error-message {
+            color: var(--wa-color-danger-fill);
+            font-size: 0.875rem;
+            margin-top: var(--wa-spacing-xs);
+        }
+        /* Toasts */
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+        .toast {
+            min-width: 240px;
+            max-width: 420px;
+            padding: 0.75rem 1rem;
+            border-radius: var(--wa-corner-radius);
+            box-shadow: var(--wa-shadow-lg);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            animation: slide-in 120ms ease-out;
+        }
+        .toast-success { background: var(--wa-success-color); }
+        .toast-error { background: var(--wa-danger-color); }
+        .toast button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    <div class="container">
+        <h1>Products Manager</h1>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" aria-label="Products tabs">
+            <button id="tab-load" class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-load">
+                Products
+            </button>
+            <button id="tab-add" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-add">
+                Add new product
+            </button>
+        </div>
+
+        <!-- Tab Panels -->
+        <div id="panel-load" class="tab-content active" role="tabpanel" aria-labelledby="tab-load">
+            <div class="section" style="max-width: 640px; margin: 0 auto; text-align:center;">
+                <input type="text" id="search" placeholder="Search by title..."
+                       style="width:100%; max-width:480px;" />
+            </div>
+
+            <!-- Products Table -->
+            <div id="products-table"></div>
+        </div>
+
+        <div id="panel-add" class="tab-content" role="tabpanel" aria-labelledby="tab-add">
+            <div class="section" style="max-width: 640px; margin: 0 auto;">
+                <h2 style="font-size: 1.5rem; margin-bottom: var(--wa-spacing-md); text-align:center;">Add New Product</h2>
+                <form hx-post="/products" hx-target="#products-table" hx-swap="innerHTML" hx-on:productAdded="this.reset()">
+                    <div class="form-group">
+                        <label for="title">Title *</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendor">Vendor *</label>
+                        <input type="text" id="vendor" name="vendor" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productType">Product type</label>
+                        <input type="text" id="productType" name="productType">
+                    </div>
+
+                    <div style="text-align:center;">
+                        <button type="submit">Add Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const tabLoad = document.getElementById('tab-load');
+            const tabAdd = document.getElementById('tab-add');
+            const panelLoad = document.getElementById('panel-load');
+            const panelAdd = document.getElementById('panel-add');
+            const productsTable = document.getElementById('products-table');
+            let productsLoaded = false;
+            
+            function activate(tab){
+                const isLoad = tab === 'load';
+                tabLoad.classList.toggle('active', isLoad);
+                tabAdd.classList.toggle('active', !isLoad);
+                tabLoad.setAttribute('aria-selected', String(isLoad));
+                tabAdd.setAttribute('aria-selected', String(!isLoad));
+                panelLoad.classList.toggle('active', isLoad);
+                panelAdd.classList.toggle('active', !isLoad);
+                
+                // Load products when Products tab is activated for the first time
+                if (isLoad && !productsLoaded && productsTable) {
+                    if (window.htmx && typeof window.htmx.ajax === 'function') {
+                        window.htmx.ajax('GET', '/products/table', {
+                            target: '#products-table',
+                            swap: 'innerHTML'
+                        });
+                    } else {
+                        // Fallback: direct fetch
+                        fetch('/products/table', { headers: { 'HX-Request': 'true' }})
+                            .then(function(r){ return r.text(); })
+                            .then(function(html){
+                                if (productsTable) productsTable.innerHTML = html;
+                            })
+                            .catch(function(err){ console.error(err); });
+                    }
+                    productsLoaded = true;
+                }
+            }
+            tabLoad && tabLoad.addEventListener('click', function(){ activate('load'); });
+            tabAdd && tabAdd.addEventListener('click', function(){ activate('add'); });
+        })();
+    </script>
+</body>
+</html>
+

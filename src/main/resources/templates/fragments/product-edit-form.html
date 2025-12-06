@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <th:block th:fragment="form">
+    <style>
+      .form-row { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+      .actions { margin-top: .75rem; display: flex; gap: .5rem; }
+      .btn { background: #007bff; color: #fff; border: none; padding: .5rem .9rem; border-radius: .375rem; cursor: pointer; }
+      .btn-secondary { background: #6c757d; }
+      label { font-weight: 500; }
+      input[type="text"] { width: 100%; padding: .5rem .6rem; border: 1px solid #dee2e6; border-radius: .375rem; }
+    </style>
+
+    <div th:if="${product != null}">
+      <form th:attr="hx-post=@{/products/{id}/update(id=${product.id})}"
+            hx-target="#products-table"
+            hx-swap="innerHTML">
+        <div class="form-row">
+          <div>
+            <label for="p_title">Title *</label>
+            <input id="p_title" type="text" name="title" required th:value="${product.title}" />
+          </div>
+          <div>
+            <label for="p_vendor">Vendor *</label>
+            <input id="p_vendor" type="text" name="vendor" required th:value="${product.vendor}" />
+          </div>
+          <div>
+            <label for="p_type">Product type</label>
+            <input id="p_type" type="text" name="productType" th:value="${product.productType}" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" class="btn btn-secondary"
+                  th:attr="onclick=|document.getElementById('product-edit-row-' + ${product.id}).style.display='none'|">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </th:block>
+</body>
+</html>
