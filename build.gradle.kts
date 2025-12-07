@@ -58,6 +58,8 @@ dependencies {
 	// Mockito Kotlin for unit tests
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    //Redis testcontainer
+    testImplementation("com.redis:testcontainers-redis")
 }
 
 

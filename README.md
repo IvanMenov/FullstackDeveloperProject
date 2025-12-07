@@ -7,6 +7,7 @@ A modern product management application built with Spring Boot, Kotlin, HTMX, Th
 - **Spring Boot 3.5.7** - Backend framework
 - **Kotlin** - Programming language
 - **PostgreSQL** - Database
+- **Redis** - Caching
 - **Flyway** - Database migrations
 - **HTMX** - Dynamic UI updates without page reloads
 - **Thymeleaf** - Server-side rendering
@@ -23,131 +24,54 @@ A modern product management application built with Spring Boot, Kotlin, HTMX, Th
 
 ## Prerequisites
 
-- Java 25+
+- Java 24+
 - Docker and Docker Compose (for PostgreSQL)
 - Gradle (optional, uses wrapper)
 
 ## Setup Instructions
 
-### 1. Start PostgreSQL Database
+### 1. Start Docker Desktop
 
-Start the PostgreSQL database using Docker Compose:
+The project runs in docker containers so you have to have Docker engine up and running.
 
+### 2. Build and start up the application
+
+There is a convenient script that:
+1. Runs all tests
+2. Builds the app executable
+3. Shutting current docker compose set and cleans it up
+4. Rebuild the app image and starts up the whole setup - posgres, redis, app containers
+ 
 ```bash
-docker-compose up -d
+ .\build-and-restart.ps1
 ```
-
-This will start a PostgreSQL container on port 5432 with:
-- Database: `productdb`
-- Username: `postgres`
-- Password: `postgres`
-
-### 2. Build the Application
-
-```bash
-./gradlew build
-```
-
-Or on Windows:
-
-```bash
-gradlew.bat build
-```
-
-### 3. Run the Application
-
-```bash
-./gradlew bootRun
-```
-
-Or on Windows:
-
-```bash
-gradlew.bat bootRun
-```
-
-The application will be available at: `http://localhost:8080/products`
 
 ### 4. Using the Application
 
-1. Navigate to `http://localhost:8080/products`
-2. Click the "Load Products" button to fetch products from the database
+1. Navigate to `http://localhost:8080`
+2. Click the "Products" button to fetch products from the database
+3. Click on "View variants" button to fetch all product variants available
+4. You can edit/delete each product/product variant
 3. Fill in the form to add a new product:
-   - Name (required)
-   - Description (optional)
-   - Price (required)
-4. Click "Add Product" to save and see the table update automatically
+   - Title 
+   - Vendor
+   - Product type
 
-## Project Structure
-
-```
-src/
-├── main/
-│   ├── kotlin/com/respiroc/greg/fullstackdeveloperproject/
-│   │   ├── FullstackDeveloperProjectApplication.kt  # Main application class
-│   │   ├── controller/
-│   │   │   └── ProductController.kt                 # REST endpoints
-│   │   ├── model/
-│   │   │   └── Product.kt                           # Data entity
-│   │   └── repository/
-│   │       └── ProductRepository.kt                 # JPA repository
-│   └── resources/
-│       ├── application.properties                   # App configuration
-│       ├── db/
-│       │   └── migration/
-│       │       └── V1__Create_products_table.sql    # Flyway migration
-│       └── templates/
-│           ├── index.html                           # Main page
-│           └── fragments/
-│               └── product-table.html               # Table fragment
-docker-compose.yml                                   # PostgreSQL setup
-build.gradle.kts                                     # Build configuration
-```
 
 ## Database
 
-The database schema is managed by Flyway migrations. The products table includes:
+The database schema is managed by Flyway migrations. 
+
+The `products` table includes:
 - `id` - Primary key (auto-generated)
-- `name` - Product name
-- `description` - Product description
-- `price` - Product price
-- `created_at` - Timestamp
+- `title`
+- `vendor`
+- `product_type` 
 
-## Design System
-
-The application uses Web Awesome design tokens for consistent styling:
-- Colors (`--wa-color-*`)
-- Spacing (`--wa-spacing-*`)
-- Borders (`--wa-stroke-width-*`)
-- Shadows (`--wa-shadow-*`)
-- Corner radius (`--wa-corner-radius`)
-
-## Development
-
-### Run Tests
-
-```bash
-./gradlew test
-```
-
-### Stop Database
-
-```bash
-docker-compose down
-```
-
-To also remove volumes:
-
-```bash
-docker-compose down -v
-```
-
-## License
-
-This project is open source and available under the MIT License.
-
-
-
-
-
-
+The `products_variant` table includes:
+- `id` - Primary key (auto-generated)
+- `product_id` - foreign key referencing the product id from product table
+- `color_option` 
+- `size_option`
+- `price`
+- `available`

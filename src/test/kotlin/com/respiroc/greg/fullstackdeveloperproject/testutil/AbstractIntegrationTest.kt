@@ -20,20 +20,28 @@ abstract class AbstractIntegrationTest {
         fun checkDocker() {
             // Gracefully skip the entire test class when Docker is unavailable
             Assumptions.assumeTrue(
-                try { DockerClientFactory.instance().isDockerAvailable() } catch (ex: Throwable) { false },
+                try {
+                    DockerClientFactory.instance().isDockerAvailable
+                } catch (ex: Throwable) { false },
                 "Docker is not available; skipping integration tests"
             )
             // Ensure the shared container is started once per JVM
             SharedPostgresContainer.instance
+            SharedRedisContainer.instance
         }
 
         @JvmStatic
         @DynamicPropertySource
         fun postgresProps(registry: DynamicPropertyRegistry) {
-            val container = SharedPostgresContainer.instance
-            registry.add("spring.datasource.url") { container.jdbcUrl }
-            registry.add("spring.datasource.username") { container.username }
-            registry.add("spring.datasource.password") { container.password }
+            val containerPostgres = SharedPostgresContainer.instance
+
+            registry.add("spring.datasource.url") { containerPostgres.jdbcUrl }
+            registry.add("spring.datasource.username") { containerPostgres.username }
+            registry.add("spring.datasource.password") { containerPostgres.password }
+
+            val containerRedis = SharedRedisContainer.instance
+            registry.add("spring.data.redis.host") { containerRedis.host }
+            registry.add("spring.data.redis.port") { containerRedis.getMappedPort(6379) }
         }
     }
 }
