@@ -65,16 +65,14 @@ class ProductController(
             // Return the updated table (reset to first page)
             getProductTable(model, 0, null)
         } catch (ex: Exception) {
-            // Provide an error feedback event and prevent swapping
             response.status = 400
             response.setHeader("HX-Reswap", "none")
             val message = (ex.message ?: "Failed to create product")
             response.setHeader("HX-Trigger", "{\"productAddFailed\": { \"message\": \"" + message.replace("\"", "'") + "\" }}")
-            "fragments/product-table :: table" // Not swapped due to HX-Reswap none
+            "fragments/product-table :: table"
         }
     }
 
-    // --- Product edit ---
     @GetMapping("/products/{id}/edit")
     fun editProduct(@PathVariable("id") id: Long, model: Model): String {
         val product = productService.findProductById(id)

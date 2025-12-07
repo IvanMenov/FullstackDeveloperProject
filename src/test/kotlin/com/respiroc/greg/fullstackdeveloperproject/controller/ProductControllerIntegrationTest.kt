@@ -41,9 +41,9 @@ class ProductControllerIntegrationTest : AbstractIntegrationTest() {
         mockMvc.perform(get("/products/table"))
             .andExpect(status().isOk)
             .andExpect(content().string(Matchers.containsString("<table")))
-            .andExpect(content().string(Matchers.containsString("Products")))
-            .andExpect(content().string(Matchers.containsString("Alpha Tee")))
-            .andExpect(content().string(Matchers.containsString("Actions")))
+            .andExpect(content().string(Matchers.containsString("<td>Alpha Tee</td>")))
+            .andExpect(content().string(Matchers.containsString("<td>Acme</td>")))
+            .andExpect(content().string(Matchers.containsString("<td>Clothes</td>")))
     }
 
     @Test
@@ -56,10 +56,13 @@ class ProductControllerIntegrationTest : AbstractIntegrationTest() {
                 .param("productType", "Hats")
         )
             .andExpect(status().isOk)
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("Beta Cap")))
-
-        val titles: List<String> = jdbcTemplate.queryForList("SELECT title FROM products", String::class.java)
-        assertThat(titles).contains("Beta Cap")
+           //
+        mockMvc.perform(get("/products/table"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(Matchers.containsString("<table")))
+            .andExpect(content().string(Matchers.containsString("<td>Beta Cap</td>")))
+            .andExpect(content().string(Matchers.containsString("<td>BrandCo</td>")))
+            .andExpect(content().string(Matchers.containsString("<td>Hats</td>")))
     }
 
     @Test
@@ -75,11 +78,11 @@ class ProductControllerIntegrationTest : AbstractIntegrationTest() {
                 .param("available", "true")
         )
             .andExpect(status().isOk)
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("Red")))
+            .andExpect(content().string(Matchers.containsString("Red")))
 
         mockMvc.perform(get("/products/${product.id}/variants"))
             .andExpect(status().isOk)
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("Red")))
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("M")))
+            .andExpect(content().string(Matchers.containsString("Red")))
+            .andExpect(content().string(Matchers.containsString("M")))
     }
 }

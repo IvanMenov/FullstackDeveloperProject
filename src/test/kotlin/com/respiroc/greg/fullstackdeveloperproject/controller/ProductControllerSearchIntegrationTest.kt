@@ -3,6 +3,7 @@ package com.respiroc.greg.fullstackdeveloperproject.controller
 import com.respiroc.greg.fullstackdeveloperproject.model.Product
 import com.respiroc.greg.fullstackdeveloperproject.repository.ProductRepository
 import com.respiroc.greg.fullstackdeveloperproject.testutil.AbstractIntegrationTest
+import org.hamcrest.Matchers
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,7 +46,7 @@ class ProductControllerSearchIntegrationTest : AbstractIntegrationTest() {
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("Alpha Tee")))
             .andExpect(content().string(containsString("alpha hat")))
-            .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Bravo Mug"))))
+            .andExpect(content().string(Matchers.not(containsString("Bravo Mug"))))
             // Pagination buttons should preserve q
             .andExpect(content().string(containsString("/products/table?page=1&amp;q=alpha")))
     }
