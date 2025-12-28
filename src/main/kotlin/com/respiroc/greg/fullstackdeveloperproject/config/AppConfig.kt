@@ -1,6 +1,7 @@
 package com.respiroc.greg.fullstackdeveloperproject.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -50,7 +51,18 @@ class AppConfig {
 
 	@Bean
 	fun cacheManager(redisConnectionFactory: RedisConnectionFactory, redisObjectMapper: ObjectMapper): CacheManager {
-		val serializer = GenericJackson2JsonRedisSerializer(redisObjectMapper)
+		// Create ObjectMapper with Kotlin support and type information using PROPERTY format
+		// This ensures proper serialization/deserialization of generic types like PageResult<T>
+		val cacheObjectMapper = ObjectMapper().apply {
+			registerModule(KotlinModule.Builder().build())
+			// Enable default typing with PROPERTY format (adds @class property, not array wrapper)
+			activateDefaultTyping(
+				LaissezFaireSubTypeValidator.instance,
+				ObjectMapper.DefaultTyping.NON_FINAL,
+				com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+			)
+		}
+		val serializer = GenericJackson2JsonRedisSerializer(cacheObjectMapper)
 		val stringSerializer = StringRedisSerializer()
 		
 		val cacheConfig = RedisCacheConfiguration.defaultCacheConfig()

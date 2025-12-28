@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.cache.CacheManager
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.web.servlet.MockMvc
@@ -27,10 +28,15 @@ class ProductControllerPagingIntegrationTest : AbstractIntegrationTest() {
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
 
+    @Autowired
+    lateinit var cacheManager: CacheManager
+
     @BeforeEach
     fun clean() {
         jdbcTemplate.execute("DELETE FROM product_variants")
         jdbcTemplate.execute("DELETE FROM products")
+        // Clear cache to prevent test interference
+        cacheManager.getCache("productPages")?.clear()
     }
 
     private fun seedProducts(n: Int) {

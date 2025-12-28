@@ -1,37 +1,3 @@
-(function(){
-  function toggleVariantsRow(el){
-    if(!el) return;
-    var id = el.dataset && el.dataset.productId ? el.dataset.productId : null;
-    if(!id) return;
-
-    var rowId = 'variants-row-' + id;
-    var row = document.getElementById(rowId);
-    if(!row) return;
-
-    // Use class-based visibility to avoid unreliable computed styles
-    var isOpen = row.classList.contains('open');
-    if (isOpen) {
-      row.classList.remove('open');
-      row.style.display = 'none';
-    } else {
-      row.classList.add('open');
-      row.style.display = 'table-row';
-    }
-
-    // Optional: toggle button text for better UX
-    try {
-      if (el instanceof HTMLElement) {
-        var showLabel = el.getAttribute('data-toggle-label-show') || 'View variants';
-        var hideLabel = el.getAttribute('data-toggle-label-hide') || 'Hide variants';
-        el.textContent = isOpen ? showLabel : hideLabel;
-      }
-    } catch(e){ console.error(e);} 
-  }
-
-  // expose globally for hx-on or onclick usage
-  window.toggleVariantsRow = toggleVariantsRow;
-})();
-
 // Handle variants row toggle and HTMX integration
 (function(){
   // Handle click to toggle - close if open, otherwise let HTMX handle the request
@@ -54,51 +20,15 @@
         e.preventDefault();
         e.stopPropagation();
         return false;
-      }
-      // If closed, let HTMX handle it - don't prevent
-    } catch(err){ console.error(err); }
-  });
-  
-  // Show row when HTMX request starts for variants
-  document.addEventListener('htmx:beforeRequest', function(e){
-    try {
-      var el = e.detail && e.detail.elt;
-      if(!el || !el.classList || !el.classList.contains('js-toggle-variants')) return;
-      
-      var id = el.getAttribute('data-product-id');
-      if(!id) return;
-      var row = document.getElementById('variants-row-' + id);
-      if(row) {
-        row.classList.add('open');
-        row.style.display = 'table-row';
-        el.textContent = 'Hide variants';
-      }
-    } catch(err){ console.error(err); }
-  });
-  
-  // Ensure row stays visible after HTMX swaps content
-  document.addEventListener('htmx:afterSwap', function(e){
-    try {
-      var target = e.detail && e.detail.target;
-      if(!target) return;
-      
-      // Check if the swapped content is inside a variants-content div
-      var variantsContent = target.id && target.id.indexOf('variants-content-') === 0 
-        ? target 
-        : (target.closest && target.closest('[id^="variants-content-"]'));
-      if(variantsContent) {
-        var productId = variantsContent.id.replace('variants-content-', '');
-        var row = document.getElementById('variants-row-' + productId);
-        if(row) {
+      } else{
           row.classList.add('open');
           row.style.display = 'table-row';
-        }
-        // Update button text
-        var btn = document.querySelector('button.js-toggle-variants[data-product-id="' + productId + '"]');
-        if(btn) {
           btn.textContent = 'Hide variants';
-        }
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
       }
+      // If closed, let HTMX handle it - don't prevent
     } catch(err){ console.error(err); }
   });
 })();
@@ -259,4 +189,70 @@
       // Let HTMX proceed normally (hx-get on the button)
     } catch(err){ console.error(err); }
   });
+})();
+
+// Tab switching and initial product loading
+(function(){
+    let productsLoaded = false;
+
+    function loadProducts(tab){
+        const tabLoad = document.getElementById('tab-load');
+        const tabAdd = document.getElementById('tab-add');
+        const panelLoad = document.getElementById('panel-load');
+        const panelAdd = document.getElementById('panel-add');
+        const productsTable = document.getElementById('products-table');
+
+        if (!tabLoad || !tabAdd || !panelLoad || !panelAdd) return;
+
+        const isLoad = tab === 'load';
+        tabLoad.classList.toggle('active', isLoad);
+        tabAdd.classList.toggle('active', !isLoad);
+        tabLoad.setAttribute('aria-selected', String(isLoad));
+        tabAdd.setAttribute('aria-selected', String(!isLoad));
+        panelLoad.classList.toggle('active', isLoad);
+        panelAdd.classList.toggle('active', !isLoad);
+
+        // Load products when Products tab is activated for the first time
+        if (isLoad && !productsLoaded && productsTable) {
+            if (window.htmx && typeof window.htmx.ajax === 'function') {
+                window.htmx.ajax('GET', '/products/table', {
+                    target: '#products-table',
+                    swap: 'innerHTML'
+                });
+            } else {
+                // Fallback: direct fetch
+                fetch('/products/table', { headers: { 'HX-Request': 'true' }})
+                    .then(function(r){ return r.text(); })
+                    .then(function(html){
+                        if (productsTable) productsTable.innerHTML = html;
+                    })
+                    .catch(function(err){ console.error(err); });
+            }
+            productsLoaded = true;
+        }
+    }
+
+    // Set up tab button event listeners
+    function setupTabs(){
+        const tabLoad = document.getElementById('tab-load');
+        const tabAdd = document.getElementById('tab-add');
+        
+        if (tabLoad) {
+            tabLoad.addEventListener('click', function(){ loadProducts('load'); });
+        }
+        if (tabAdd) {
+            tabAdd.addEventListener('click', function(){ loadProducts('add'); });
+        }
+
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupTabs);
+    } else {
+        setupTabs();
+    }
+
+    // Expose function globally for debugging/other uses if needed
+    window.loadProducts = loadProducts;
 })();

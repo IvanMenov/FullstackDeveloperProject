@@ -1,11 +1,12 @@
 # Stop on first error
 $ErrorActionPreference = "Stop"
 
-Write-Host "Running Gradle tests..."
-./gradlew.bat test
-
 Write-Host "Building project..."
 ./gradlew.bat build
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Gradle build failed with exit code $LASTEXITCODE"
+    exit $LASTEXITCODE
+}
 
 Write-Host "Gradle build and tests succeeded."
 

@@ -29,23 +29,17 @@ class ProductService(
     private val objectMapper: ObjectMapper
 ) {
 
-    data class PageResult<T>(
-        val items: List<T>,
-        val page: Int,
-        val size: Int,
-        val totalItems: Long,
-        val totalPages: Int,
-        val hasPrev: Boolean,
-        val hasNext: Boolean
-    )
-
     private val logger = LoggerFactory.getLogger(ProductService::class.java)
     private val jsonFactory = JsonFactory(objectMapper)
 
     fun findAll(): List<Product> {
         return productRepository.findAll()
     }
-
+    @Cacheable(
+        cacheNames = ["productPages"],
+        key = "'page=' + #page + ':size=' + #requestedSize + ':query=' + (#query != null ? #query : '')",
+        unless = "#page > 1 || (#query != null && #query.trim().length() > 0)"
+    )
     fun findPage(page: Int, requestedSize: Int = 35, query: String? = null): PageResult<Product> {
         val size = requestedSize.coerceIn(1, 35)
         val q = query?.trim().orEmpty()

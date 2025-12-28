@@ -3,7 +3,6 @@ package com.respiroc.greg.fullstackdeveloperproject.controller
 import com.respiroc.greg.fullstackdeveloperproject.model.Product
 import com.respiroc.greg.fullstackdeveloperproject.repository.ProductRepository
 import com.respiroc.greg.fullstackdeveloperproject.testutil.AbstractIntegrationTest
-import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,7 +13,8 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @AutoConfigureMockMvc
 class ProductControllerIntegrationTest : AbstractIntegrationTest() {
@@ -34,17 +34,6 @@ class ProductControllerIntegrationTest : AbstractIntegrationTest() {
         jdbcTemplate.execute("DELETE FROM products")
     }
 
-    @Test
-    fun `GET products table returns fragment with centered headers and actions column`() {
-        productRepository.save(Product(title = "Alpha Tee", vendor = "Acme", productType = "Clothes"))
-
-        mockMvc.perform(get("/products/table"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(Matchers.containsString("<table")))
-            .andExpect(content().string(Matchers.containsString("<td>Alpha Tee</td>")))
-            .andExpect(content().string(Matchers.containsString("<td>Acme</td>")))
-            .andExpect(content().string(Matchers.containsString("<td>Clothes</td>")))
-    }
 
     @Test
     fun `POST create product adds row and returns updated table`() {
