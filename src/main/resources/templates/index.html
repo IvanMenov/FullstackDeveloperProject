@@ -303,47 +303,6 @@
         </div>
     </div>
 
-    <script>
-        (function(){
-            const tabLoad = document.getElementById('tab-load');
-            const tabAdd = document.getElementById('tab-add');
-            const panelLoad = document.getElementById('panel-load');
-            const panelAdd = document.getElementById('panel-add');
-            const productsTable = document.getElementById('products-table');
-            let productsLoaded = false;
-            
-            function activate(tab){
-                const isLoad = tab === 'load';
-                tabLoad.classList.toggle('active', isLoad);
-                tabAdd.classList.toggle('active', !isLoad);
-                tabLoad.setAttribute('aria-selected', String(isLoad));
-                tabAdd.setAttribute('aria-selected', String(!isLoad));
-                panelLoad.classList.toggle('active', isLoad);
-                panelAdd.classList.toggle('active', !isLoad);
-                
-                // Load products when Products tab is activated for the first time
-                if (isLoad && !productsLoaded && productsTable) {
-                    if (window.htmx && typeof window.htmx.ajax === 'function') {
-                        window.htmx.ajax('GET', '/products/table', {
-                            target: '#products-table',
-                            swap: 'innerHTML'
-                        });
-                    } else {
-                        // Fallback: direct fetch
-                        fetch('/products/table', { headers: { 'HX-Request': 'true' }})
-                            .then(function(r){ return r.text(); })
-                            .then(function(html){
-                                if (productsTable) productsTable.innerHTML = html;
-                            })
-                            .catch(function(err){ console.error(err); });
-                    }
-                    productsLoaded = true;
-                }
-            }
-            tabLoad && tabLoad.addEventListener('click', function(){ activate('load'); });
-            tabAdd && tabAdd.addEventListener('click', function(){ activate('add'); });
-        })();
-    </script>
 </body>
 </html>
 
