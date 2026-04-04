@@ -40,37 +40,46 @@ class ProductServicePaginationTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `page size is capped at 35 and navigation flags are correct`() {
-        seedProducts(80) // 3 pages with size 35: 35 + 35 + 10
+    fun `page size is capped at 20 and navigation flags are correct`() {
+        seedProducts(70) // 3 pages with size 20 + 1 page with size 10
 
         val p0 = productService.findPage(0, 100)
-        assertThat(p0.size).isEqualTo(35)
+        assertThat(p0.size).isEqualTo(20)
         assertThat(p0.page).isEqualTo(0)
-        assertThat(p0.totalItems).isEqualTo(80)
-        assertThat(p0.totalPages).isEqualTo(3)
+        assertThat(p0.totalItems).isEqualTo(70)
+        assertThat(p0.totalPages).isEqualTo(4)
         assertThat(p0.hasPrev).isFalse()
         assertThat(p0.hasNext).isTrue()
-        assertThat(p0.items).hasSize(35)
+        assertThat(p0.items).hasSize(20)
         assertThat(p0.items.first().title).isEqualTo("P0001")
-        assertThat(p0.items.last().title).isEqualTo("P0035")
+        assertThat(p0.items.last().title).isEqualTo("P0020")
 
-        val p1 = productService.findPage(1, 35)
-        assertThat(p1.size).isEqualTo(35)
+        val p1 = productService.findPage(1, 20)
+        assertThat(p1.size).isEqualTo(20)
         assertThat(p1.page).isEqualTo(1)
         assertThat(p1.hasPrev).isTrue()
         assertThat(p1.hasNext).isTrue()
-        assertThat(p1.items).hasSize(35)
-        assertThat(p1.items.first().title).isEqualTo("P0036")
-        assertThat(p1.items.last().title).isEqualTo("P0070")
+        assertThat(p1.items).hasSize(20)
+        assertThat(p1.items.first().title).isEqualTo("P0021")
+        assertThat(p1.items.last().title).isEqualTo("P0040")
 
-        val p2 = productService.findPage(2, 35)
-        assertThat(p2.size).isEqualTo(35)
+        val p2 = productService.findPage(2, 20)
+        assertThat(p2.size).isEqualTo(20)
         assertThat(p2.page).isEqualTo(2)
         assertThat(p2.hasPrev).isTrue()
-        assertThat(p2.hasNext).isFalse()
-        assertThat(p2.items).hasSize(10)
-        assertThat(p2.items.first().title).isEqualTo("P0071")
-        assertThat(p2.items.last().title).isEqualTo("P0080")
+        assertThat(p2.hasNext).isTrue()
+        assertThat(p2.items).hasSize(20)
+        assertThat(p2.items.first().title).isEqualTo("P0041")
+        assertThat(p2.items.last().title).isEqualTo("P0060")
+
+        val p3 = productService.findPage(3, 20)
+        assertThat(p3.size).isEqualTo(20)
+        assertThat(p3.page).isEqualTo(3)
+        assertThat(p3.hasPrev).isTrue()
+        assertThat(p3.hasNext).isFalse()
+        assertThat(p3.items).hasSize(10)
+        assertThat(p3.items.first().title).isEqualTo("P0061")
+        assertThat(p3.items.last().title).isEqualTo("P0070")
     }
 
     @Test

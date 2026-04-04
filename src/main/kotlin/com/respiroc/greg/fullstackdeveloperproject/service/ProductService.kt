@@ -9,24 +9,26 @@ import com.respiroc.greg.fullstackdeveloperproject.model.ProductVariant
 import com.respiroc.greg.fullstackdeveloperproject.repository.ProductRepository
 import com.respiroc.greg.fullstackdeveloperproject.repository.ProductVariantRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import org.springframework.core.io.Resource
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestTemplate
 import java.io.InputStream
 import java.math.BigDecimal
-import kotlin.String
+import java.net.URL
 
 @Service
 class ProductService(
     private val productRepository: ProductRepository,
     private val productVariantRepository: ProductVariantRepository,
     private val restTemplate: RestTemplate,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${app.ingestion.url}")
+    private val url: String
 ) {
 
     private val logger = LoggerFactory.getLogger(ProductService::class.java)
@@ -40,8 +42,8 @@ class ProductService(
         key = "'page=' + #page + ':size=' + #requestedSize + ':query=' + (#query != null ? #query : '')",
         unless = "#page > 1 || (#query != null && #query.trim().length() > 0)"
     )
-    fun findPage(page: Int, requestedSize: Int = 35, query: String? = null): PageResult<Product> {
-        val size = requestedSize.coerceIn(1, 35)
+    fun findPage(page: Int, requestedSize: Int, query: String? = null): PageResult<Product> {
+        val size = requestedSize.coerceIn(1, 20)
         val q = query?.trim().orEmpty()
         val filtered = q.isNotEmpty()
         val total = if (filtered) productRepository.countFiltered(q) else productRepository.count()
@@ -167,7 +169,6 @@ class ProductService(
         logger.info("Starting product fetch job")
 
         try {
-            val url = "https://famme.no/products.json"
             val response = restTemplate.getForEntity(url, Resource::class.java)
             val resource = response.body ?: return
             val inputStream = resource.inputStream

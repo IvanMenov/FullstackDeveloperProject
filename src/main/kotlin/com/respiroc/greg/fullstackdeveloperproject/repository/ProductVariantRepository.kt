@@ -1,6 +1,5 @@
 package com.respiroc.greg.fullstackdeveloperproject.repository
 
-import com.respiroc.greg.fullstackdeveloperproject.model.Product
 import com.respiroc.greg.fullstackdeveloperproject.model.ProductVariant
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Repository
