@@ -31,7 +31,7 @@ class ProductController(
         @RequestParam(name = "page", required = false, defaultValue = "0") page: Int,
         @RequestParam(name = "q", required = false) q: String?
     ): String {
-        val result = productService.findPage(page, 35, q)
+        val result = productService.findPage(page, 20, q)
         model.addAttribute("products", result.items)
         model.addAttribute("page", result.page)
         model.addAttribute("size", result.size)

@@ -47,7 +47,7 @@ class ProductControllerPagingIntegrationTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `GET products table page 0 shows first 35 items, correct controls and labels`() {
+    fun `GET products table page 0 shows first 20 items, correct controls and labels`() {
         seedProducts(40)
 
         mockMvc.perform(get("/products/table").contentType(MediaType.TEXT_HTML).param("page", "0"))
@@ -56,7 +56,7 @@ class ProductControllerPagingIntegrationTest : AbstractIntegrationTest() {
             .andExpect(content().string(Matchers.containsString("Page 1 of 2")))
             // Contains first page items
             .andExpect(content().string(Matchers.containsString("P0001")))
-            .andExpect(content().string(Matchers.containsString("P0035")))
+            .andExpect(content().string(Matchers.containsString("P0020")))
             // Does not contain next page first item
             .andExpect(content().string(Matchers.not(Matchers.containsString("P0036"))))
             // Prev should be disabled (button present) and Next enabled
