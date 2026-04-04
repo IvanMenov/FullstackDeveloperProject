@@ -1,9 +1,7 @@
-import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
-
 plugins {
-	kotlin("jvm") version "2.2.0"
-	kotlin("plugin.spring") version "2.2.0"
-	id("org.springframework.boot") version "3.5.7"
+	kotlin("jvm") version "2.3.20"
+	kotlin("plugin.spring") version "2.3.20"
+	id("org.springframework.boot") version "3.5.13"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -13,11 +11,11 @@ description = "FullstackDeveloperProject"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(24)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 kotlin {
-    jvmToolchain(24)
+    jvmToolchain(25)
 }
 
 
@@ -41,7 +39,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 		
 	// HTMX
-	implementation("io.github.wimdeblauwe:htmx-spring-boot-thymeleaf:4.0.1")
+	implementation("io.github.wimdeblauwe:htmx-spring-boot-thymeleaf:4.0.3")
 		
 	// Database
 	implementation("org.flywaydb:flyway-core")
